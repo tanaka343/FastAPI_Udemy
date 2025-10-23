@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 
-from routers import item 
-
 app = FastAPI()
-app.include_router(item.router)
+
+items =[
+    {"id":1,"name":"tanaka"},
+    {"id":2,"name":"satou"},
+]
 
 
-
+@app.get("/")
+async def sanple(items):
+    return items
