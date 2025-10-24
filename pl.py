@@ -8,5 +8,14 @@ persons = [
 #   for i,v in person.items():
 #     print(i,v)
 
+# for person in persons:
+#   print(person["name"])
+
+# persons[0]["name"]="yamada"
+# print(persons[0])
+
 for person in persons:
-  print(person["name"])
+    if person["id"]==1:
+        persons.pop(1-1)
+
+print(persons)
