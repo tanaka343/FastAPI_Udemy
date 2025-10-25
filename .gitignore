@@ -29,6 +29,7 @@ Thumbs.db
 # Docker関連
 docker-compose.override.yml
 docker-compose.override.yaml
+docker/
 
 # 一時ファイル
 *.tmp
@@ -39,3 +40,14 @@ docker-compose.override.yaml
 # マイグレーションの自動生成ファイル（必要に応じて無視）
 migrations/__pycache__/
 migrations/*.pyc
+
+# Alembic compiled / temporary files
+migrations/versions/*.pyc
+migrations/versions/*.pyo
+migrations/versions/__pycache__/
+
+# SQLite / local database files
+*.db
+*.sqlite3
+*.sqlite
+
