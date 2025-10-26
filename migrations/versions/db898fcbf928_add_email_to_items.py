@@ -1,8 +1,8 @@
 """add email to items
 
-Revision ID: 67d26b6f6c95
-Revises: 9789f81c9864
-Create Date: 2025-10-25 22:59:49.828379
+Revision ID: db898fcbf928
+Revises: cb23c29f4239
+Create Date: 2025-10-26 13:45:17.814516
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '67d26b6f6c95'
-down_revision: Union[str, Sequence[str], None] = '9789f81c9864'
+revision: str = 'db898fcbf928'
+down_revision: Union[str, Sequence[str], None] = 'cb23c29f4239'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
