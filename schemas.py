@@ -1,4 +1,4 @@
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field,ConfigDict
 from typing import Optional
 
 
@@ -15,3 +15,5 @@ class ItemUpdate(BaseModel):
 class ItemResponse(BaseModel):
     name :str = Field(min_length=2,max_length=20,examples=["satou"])
     email :str = Field(min_length=2,max_length=20,examples=["dafgz@com"])
+
+    model_config = ConfigDict(from_attributes=True)
