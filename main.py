@@ -20,21 +20,14 @@ async def find_all(db :Session = Depends(get_data)):
     return db.query(Item).all()
 
 
-# @app.get("/items/{id}",response_model=Optional[ItemResponse])
-# async def find_by_id(id :int):
-#     for item in items:
-#         if item["id"]==id:
-#             return item
-        
+@app.get("/items/{id}",response_model=Optional[ItemResponse])
+async def find_by_id(id :int,db :Session = Depends(get_data)):
+    return db.query(Item).filter(Item.id == id).first()
 
-# @app.get("/items/",response_model=list[ItemResponse])
-# async def find_by_name(name :str):
-#     filtered_name=[]
-#     for item in items:
-#         if name in item["name"]:
-#             filtered_name.append(item)
-#     return filtered_name
-
+@app.get("/items/",response_model=list[ItemResponse])
+async def find_by_name(name :str,db :Session = Depends(get_data)):
+    return db.query(Item).filter(Item.name == name).all()
+    
 
 
 @app.post("/items",response_model=ItemResponse)
