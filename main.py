@@ -30,8 +30,10 @@ async def find_by_id(id :int,db :Session = Depends(get_data)):
 
 @app.get("/items/",response_model=list[ItemResponse])
 async def find_by_name(name :str,db :Session = Depends(get_data)):
-    return db.query(Item).filter(Item.name == name).all()
-    
+    found_item = db.query(Item).filter(Item.name == name).all()
+    if found_item is None:
+        raise HTTPException(status_code=404,detail="Item not found")
+    return found_item
 
 
 @app.post("/items",response_model=ItemResponse)
