@@ -13,6 +13,7 @@ class ItemUpdate(BaseModel):
 
 
 class ItemResponse(BaseModel):
+    id :int
     name :str = Field(min_length=2,max_length=20,examples=["satou"])
     email :str = Field(min_length=2,max_length=20,examples=["dafgz@com"])
 
