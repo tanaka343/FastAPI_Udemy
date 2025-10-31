@@ -17,7 +17,7 @@ items = [
 
 @app.get("/items",response_model=list[ItemResponse])
 async def find_all(db :Session = Depends(get_data)):
-    return db.query(Item).all()
+    return db.query(Item).order_by(Item.id).all()
 
 
 @app.get("/items/{id}",response_model=Optional[ItemResponse])
@@ -36,11 +36,6 @@ async def find_by_name(name :str,db :Session = Depends(get_data)):
 
 @app.post("/items",response_model=ItemResponse)
 async def create(create_item :ItemCreate,db :Session = Depends(get_data)):
-    # new_item={
-    #     "id":len(items)+1,
-    #     "name":create_item.name,
-    #     "email":create_item.email,
-    # }
     new_item = Item(
         **create_item.model_dump()
     )
@@ -49,19 +44,29 @@ async def create(create_item :ItemCreate,db :Session = Depends(get_data)):
     return new_item
 
 
-# @app.put("/items/{id}",response_model=Optional[ItemResponse])
-# async def update(id :int,update_item :ItemUpdate):
-#     for item in items:
-#         if item["id"]==id:
-#             item["name"]=item["name"] if update_item.name is None else update_item.name
-#             item["email"]=item["email"] if update_item.email is None else update_item.email
+@app.put("/items/{id}",response_model=Optional[ItemResponse])
+async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_data)):
+    
+    item = db.query(Item).filter(Item.id == id).first()
+    
+    if item is None:
+        return None
+    
+    item.name =item.name if update_item.name is None else update_item.name
+    item.email =item.email if update_item.email is None else update_item.email
 
-#             return item
-        
-# @app.delete("/items/{id}",response_model=Optional[ItemResponse])
-# async def deleate(id :int):
-#     for i in range(len(items)):
-#         if items[i]["id"]==id:
-#             item=items.pop(i)
-#             return item
+    db.add(item)
+    db.commit()
+    return item
             
+        
+@app.delete("/items/{id}",response_model=Optional[ItemResponse])
+async def deleate(id :int,db :Session=Depends(get_data)):
+
+    item = await find_by_id(id,db)
+
+    if item is None:
+        return None
+    db.delete(item)
+    db.commit()
+    return item
