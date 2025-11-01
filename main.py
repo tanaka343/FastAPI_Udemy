@@ -4,7 +4,7 @@ from database import get_data
 from typing import Optional
 from sqlalchemy.orm import Session
 from models import Item
-
+from starlette import status
 app = FastAPI()
 
 items = [
@@ -15,12 +15,13 @@ items = [
 
 #READ処理
 
-@app.get("/items",response_model=list[ItemResponse])
+@app.get("/items",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
 async def find_all(db :Session = Depends(get_data)):
-    return db.query(Item).order_by(Item.id).all()
+    found_item = db.query(Item).order_by(Item.id).all()
+    return found_item
 
 
-@app.get("/items/{id}",response_model=Optional[ItemResponse])
+@app.get("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
 async def find_by_id(id :int,db :Session = Depends(get_data)):
    found_item = db.query(Item).filter(Item.id == id).first()
    if found_item is None:
@@ -28,7 +29,7 @@ async def find_by_id(id :int,db :Session = Depends(get_data)):
    return found_item
        
 
-@app.get("/items/",response_model=list[ItemResponse])
+@app.get("/items/",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
 async def find_by_name(name :str,db :Session = Depends(get_data)):
     found_item = db.query(Item).filter(Item.name == name).all()
     if not found_item:
@@ -36,7 +37,7 @@ async def find_by_name(name :str,db :Session = Depends(get_data)):
     return found_item
 
 
-@app.post("/items",response_model=ItemResponse)
+@app.post("/items",response_model=ItemResponse,status_code=status.HTTP_201_CREATED)
 async def create(create_item :ItemCreate,db :Session = Depends(get_data)):
     new_item = Item(
         **create_item.model_dump()
@@ -46,7 +47,7 @@ async def create(create_item :ItemCreate,db :Session = Depends(get_data)):
     return new_item
 
 
-@app.put("/items/{id}",response_model=Optional[ItemResponse])
+@app.put("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
 async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_data)):
     
     item = db.query(Item).filter(Item.id == id).first()
@@ -62,7 +63,7 @@ async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_data)):
     return item
             
         
-@app.delete("/items/{id}",response_model=Optional[ItemResponse])
+@app.delete("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
 async def deleate(id :int,db :Session=Depends(get_data)):
 
     item = await find_by_id(id,db)
