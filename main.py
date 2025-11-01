@@ -7,11 +7,6 @@ from models import Item
 from starlette import status
 app = FastAPI()
 
-items = [
-  {"id":1,"name":"tanaka1","email":"nhkh@com"},
-  {"id":2,"name":"tanaka2","email":"nhkh@com"},
-  {"id":3,"name":"tanaka3","email":"nhkh@com"},
-]
 
 #READ処理
 
