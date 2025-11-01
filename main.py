@@ -31,7 +31,7 @@ async def find_by_id(id :int,db :Session = Depends(get_data)):
 @app.get("/items/",response_model=list[ItemResponse])
 async def find_by_name(name :str,db :Session = Depends(get_data)):
     found_item = db.query(Item).filter(Item.name == name).all()
-    if found_item is None:
+    if not found_item:
         raise HTTPException(status_code=404,detail="Item not found")
     return found_item
 
@@ -52,7 +52,7 @@ async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_data)):
     item = db.query(Item).filter(Item.id == id).first()
     
     if item is None:
-        return None
+        raise HTTPException(status_code=404,detail="Item not found")
     
     item.name =item.name if update_item.name is None else update_item.name
     item.email =item.email if update_item.email is None else update_item.email
@@ -68,7 +68,7 @@ async def deleate(id :int,db :Session=Depends(get_data)):
     item = await find_by_id(id,db)
 
     if item is None:
-        return None
+        raise HTTPException(status_code=404,detail="Item not found")
     db.delete(item)
     db.commit()
     return item
