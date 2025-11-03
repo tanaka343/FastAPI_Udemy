@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Body,Depends,HTTPException
 from schemas import ItemCreate,ItemUpdate,ItemResponse
-from database import get_data
+from database import get_db
 from typing import Optional
 from sqlalchemy.orm import Session
 from models import Item
@@ -11,13 +11,13 @@ app = FastAPI()
 #READ処理
 
 @app.get("/items",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
-async def find_all(db :Session = Depends(get_data)):
+async def find_all(db :Session = Depends(get_db)):
     found_item = db.query(Item).order_by(Item.id).all()
     return found_item
 
 
 @app.get("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
-async def find_by_id(id :int,db :Session = Depends(get_data)):
+async def find_by_id(id :int,db :Session = Depends(get_db)):
    found_item = db.query(Item).filter(Item.id == id).first()
    if found_item is None:
        raise HTTPException(status_code=404,detail="Item not found")
@@ -25,7 +25,7 @@ async def find_by_id(id :int,db :Session = Depends(get_data)):
        
 
 @app.get("/items/",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
-async def find_by_name(name :str,db :Session = Depends(get_data)):
+async def find_by_name(name :str,db :Session = Depends(get_db)):
     found_item = db.query(Item).filter(Item.name == name).all()
     if not found_item:
         raise HTTPException(status_code=404,detail="Item not found")
@@ -33,7 +33,7 @@ async def find_by_name(name :str,db :Session = Depends(get_data)):
 
 
 @app.post("/items",response_model=ItemResponse,status_code=status.HTTP_201_CREATED)
-async def create(create_item :ItemCreate,db :Session = Depends(get_data)):
+async def create(create_item :ItemCreate,db :Session = Depends(get_db)):
     new_item = Item(
         **create_item.model_dump()
     )
@@ -43,7 +43,7 @@ async def create(create_item :ItemCreate,db :Session = Depends(get_data)):
 
 
 @app.put("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
-async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_data)):
+async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_db)):
     
     item = db.query(Item).filter(Item.id == id).first()
     
@@ -59,7 +59,7 @@ async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_data)):
             
         
 @app.delete("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
-async def deleate(id :int,db :Session=Depends(get_data)):
+async def deleate(id :int,db :Session=Depends(get_db)):
 
     item = await find_by_id(id,db)
 
