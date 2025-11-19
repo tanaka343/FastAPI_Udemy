@@ -5,6 +5,9 @@ from typing import Optional,Annotated
 from sqlalchemy.orm import Session
 from models import Item,User
 from starlette import status
+import hashlib
+import base64
+import os
 app = FastAPI()
 
 DbDependency = Annotated[Session,Depends(get_db)]
@@ -72,7 +75,15 @@ async def deleate(id :int,db :Session=Depends(get_db)):
 
 @app.post("/auth",response_model=UserResponse)
 async def create_user(user_create :UserCreate,db :DbDependency):
-    new_user = User(**user_create.model_dump())
+    salt = base64.b64encode(os.urandom(32))
+    hashed_password = hashlib.pbkdf2_hmac("sha256",user_create.password.encode(),salt,1000).hex()
+    new_user = User(
+        name = user_create.name,
+        password = hashed_password,
+        salt = salt.decode()
+    )
+    
+    # new_user = User(**user_create.model_dump())
     db.add(new_user)
     db.commit()
     return new_user
