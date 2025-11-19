@@ -71,8 +71,8 @@ async def deleate(id :int,db :Session=Depends(get_db)):
 
 
 @app.post("/auth",response_model=UserResponse)
-async def create_user(user_create :UserCreate,db :Session=DbDependency):
-    new_user = User(**user_create.model_dump)
+async def create_user(user_create :UserCreate,db :DbDependency):
+    new_user = User(**user_create.model_dump())
     db.add(new_user)
     db.commit()
     return new_user
