@@ -1,13 +1,13 @@
 from fastapi import FastAPI,Body,Depends,HTTPException
-from schemas import ItemCreate,ItemUpdate,ItemResponse
+from schemas import ItemCreate,ItemUpdate,ItemResponse,UserCreate,UserResponse
 from database import get_db
-from typing import Optional
+from typing import Optional,Annotated
 from sqlalchemy.orm import Session
-from models import Item
+from models import Item,User
 from starlette import status
 app = FastAPI()
 
-
+DbDependency = Annotated[Session,Depends(get_db)]
 #READ処理
 
 @app.get("/items",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
@@ -68,3 +68,11 @@ async def deleate(id :int,db :Session=Depends(get_db)):
     db.delete(item)
     db.commit()
     return item
+
+
+@app.post("/auth",response_model=UserResponse)
+async def create_user(user_create :UserCreate,db :Session=DbDependency):
+    new_user = User(**user_create.model_dump)
+    db.add(new_user)
+    db.commit()
+    return new_user

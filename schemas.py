@@ -18,3 +18,13 @@ class ItemResponse(BaseModel):
     email :str = Field(min_length=2,max_length=20,examples=["dafgz@com"])
 
     model_config = ConfigDict(from_attributes=True)
+
+class UserCreate(BaseModel):
+    name : str = Field(min_length=2,examples=["tanaka"])
+    password : str = Field(min_length=8,examples=["test1234"])
+
+class UserResponse(BaseModel):
+    id : int = Field(gt=0,examples=["1"])
+    name : str = Field(min_length=2,examples=["yamada"])
+    
+    model_config= ConfigDict(from_attributes=True)
