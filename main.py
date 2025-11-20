@@ -8,9 +8,11 @@ from starlette import status
 import hashlib
 import base64
 import os
+from fastapi.security import OAuth2PasswordRequestForm
 app = FastAPI()
 
 DbDependency = Annotated[Session,Depends(get_db)]
+FormDependency = Annotated[OAuth2PasswordRequestForm,Depends()]
 #READ処理
 
 @app.get("/items",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
@@ -73,7 +75,7 @@ async def deleate(id :int,db :Session=Depends(get_db)):
     return item
 
 
-@app.post("/auth",response_model=UserResponse)
+@app.post("/auth/signup",response_model=UserResponse)
 async def create_user(user_create :UserCreate,db :DbDependency):
     salt = base64.b64encode(os.urandom(32))
     hashed_password = hashlib.pbkdf2_hmac("sha256",user_create.password.encode(),salt,1000).hex()
@@ -87,3 +89,20 @@ async def create_user(user_create :UserCreate,db :DbDependency):
     db.add(new_user)
     db.commit()
     return new_user
+
+@app.post("/auth/login",status_code=status.HTTP_200_OK)
+async def login(db :DbDependency,form_data :FormDependency):
+    username = form_data.username
+    password = form_data.password
+
+    user = db.query(User).filter(User.username==username).first()
+    if not user:
+        raise HTTPException(status_code=400,detail="Incorrect username or password")
+    hashed_password = hashlib.pbkdf2_hmac("sha256",password.encode(),user.salt.encode(),1000).hex()
+    # データベースから取得したsaltをエンコードしたものと比較する
+    if password != hashed_password:
+        raise HTTPException(status_code=400,detail="Incorrect username or password")
+    
+    return "Successful"
+
+
