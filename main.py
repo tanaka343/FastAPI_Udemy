@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Body,Depends,HTTPException
+from fastapi import FastAPI,Body,Depends,HTTPException,Request
 from schemas import ItemCreate,ItemUpdate,ItemResponse,UserCreate,UserResponse
 from database import get_db
 from typing import Optional,Annotated
@@ -9,11 +9,19 @@ import hashlib
 import base64
 import os
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 app = FastAPI()
 
 DbDependency = Annotated[Session,Depends(get_db)]
 FormDependency = Annotated[OAuth2PasswordRequestForm,Depends()]
-#READ処理
+
+
+# デバック用
+@app.exception_handler(RequestValidationError)
+async def handler(request:Request, exc:RequestValidationError):
+    print(exc)
+    return JSONResponse(content={}, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 @app.get("/items",response_model=list[ItemResponse],status_code=status.HTTP_200_OK)
 async def find_all(db :Session = Depends(get_db)):
