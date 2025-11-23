@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Body,Depends,HTTPException,Request
-from schemas import ItemCreate,ItemUpdate,ItemResponse,UserCreate,UserResponse,Token
+from schemas import ItemCreate,ItemUpdate,ItemResponse,UserCreate,UserResponse,Token,Decoded_Token
 from database import get_db
 from typing import Optional,Annotated
 from sqlalchemy.orm import Session
@@ -12,12 +12,27 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from datetime import timedelta,datetime
-from jose import jwt
+from jose import jwt,JWTError
+from fastapi.security import OAuth2PasswordBearer
+
 
 
 app = FastAPI()
 
 DbDependency = Annotated[Session,Depends(get_db)]
+OAuth2schema = OAuth2PasswordBearer(tokenUrl="/auth/login")
+def get_current_user(token :Annotated[str,Depends(OAuth2schema)]):
+    try:
+        payload = jwt.decode(token,SECRET_KEY,algorithms=ALGOLITHM)
+        username = payload.get("sub")
+        user_id = payload.get("id")
+        if username is None or user_id is None:
+            return None
+        return Decoded_Token(username=username,user_id=user_id)
+    except JWTError:
+        raise JWTError
+    
+userDependency = Annotated[Decoded_Token,Depends(get_current_user)]
 FormDependency = Annotated[OAuth2PasswordRequestForm,Depends()]
 
 
