@@ -49,8 +49,9 @@ async def find_all(db :Session = Depends(get_db)):
 
 
 @app.get("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
-async def find_by_id(id :int,db :Session = Depends(get_db)):
-   found_item = db.query(Item).filter(Item.id == id).first()
+async def find_by_id(id :int,user :userDependency,db :Session = Depends(get_db)):
+   user_id = user.user_id
+   found_item = db.query(Item).filter(Item.id == id).filter(Item.user_id ==user_id).first()
    if found_item is None:
        raise HTTPException(status_code=404,detail="Item not found")
    return found_item
@@ -65,9 +66,10 @@ async def find_by_name(name :str,db :Session = Depends(get_db)):
 
 
 @app.post("/items",response_model=ItemResponse,status_code=status.HTTP_201_CREATED)
-async def create(create_item :ItemCreate,db :Session = Depends(get_db)):
+async def create(create_item :ItemCreate,user :userDependency,db :Session = Depends(get_db)):
+    user_id = user.user_id
     new_item = Item(
-        **create_item.model_dump()
+        **create_item.model_dump(),user_id=user_id
     )
     db.add(new_item)
     db.commit()
@@ -75,9 +77,9 @@ async def create(create_item :ItemCreate,db :Session = Depends(get_db)):
 
 
 @app.put("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
-async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_db)):
-    
-    item = db.query(Item).filter(Item.id == id).first()
+async def update(id :int,update_item :ItemUpdate,user :userDependency,db :Session=Depends(get_db)):
+    user_id = user.user_id
+    item = db.query(Item).filter(Item.id == id).filter(Item.user_id==user_id).first()
     
     if item is None:
         raise HTTPException(status_code=404,detail="Item not found")
@@ -91,9 +93,9 @@ async def update(id :int,update_item :ItemUpdate,db :Session=Depends(get_db)):
             
         
 @app.delete("/items/{id}",response_model=Optional[ItemResponse],status_code=status.HTTP_200_OK)
-async def deleate(id :int,db :Session=Depends(get_db)):
+async def deleate(id :int,user :userDependency,db :Session=Depends(get_db)):
 
-    item = await find_by_id(id,db)
+    item = await find_by_id(id,user,db)
 
     if item is None:
         raise HTTPException(status_code=404,detail="Item not found")

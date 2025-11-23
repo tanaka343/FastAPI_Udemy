@@ -16,7 +16,7 @@ class ItemResponse(BaseModel):
     id :int
     name :str = Field(min_length=2,max_length=20,examples=["satou"])
     email :str = Field(min_length=2,max_length=20,examples=["dafgz@com"])
-
+    user_id :int
     model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(BaseModel):
