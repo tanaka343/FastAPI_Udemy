@@ -35,12 +35,24 @@ def create_user(user_create :UserCreate,db :Session):
     db.commit()
     return new_user
 
+# ログイン機能（ユーザーが入力した、username,passwordとデータベースを照合）
+def login(db :Session,username :str,password :str):
+    user = db.query(User).filter(User.name==username).first()
+    if not user:
+        return None
+    hashed_password = hashlib.pbkdf2_hmac("sha256",password.encode(),user.salt.encode(),1000).hex()
+    # データベースから取得したsaltをエンコードしたものと比較する
+    if user.password != hashed_password:
+        return None
+    return user
 
+# ログイン機能（トークンの発行、秘密鍵で署名）
 def create_access_token(username :str,user_id :int,expires_delta :timedelta):
     expires = datetime.now() + expires_delta
     payload = {"sub" :username,"id" :user_id,"exp" :expires}
     return jwt.encode(payload,SECRET_KEY,algorithm=ALGOLITHM)
 
+# トークンからユーザー情報を取得、認証をつけるエンドポイントに使う
 def get_current_user(token :Annotated[str,Depends(OAuth2schema)]):
     try:
         payload = jwt.decode(token,SECRET_KEY,algorithms=ALGOLITHM)
@@ -52,12 +64,3 @@ def get_current_user(token :Annotated[str,Depends(OAuth2schema)]):
     except JWTError:
         raise JWTError
     
-def login(db :Session,username :str,password :str):
-    user = db.query(User).filter(User.name==username).first()
-    if not user:
-        return None
-    hashed_password = hashlib.pbkdf2_hmac("sha256",password.encode(),user.salt.encode(),1000).hex()
-    # データベースから取得したsaltをエンコードしたものと比較する
-    if user.password != hashed_password:
-        return None
-    return user
